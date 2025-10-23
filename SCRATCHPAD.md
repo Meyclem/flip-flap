@@ -366,8 +366,8 @@ if (result.enabled) {
 **Phase 1 Complete!** All architectural decisions have been finalized and documented in `docs/README.md`. Ready to begin implementation.
 
 ### Phase 2: Implementation (AI-Assisted)
-4. [ ] Set up project structure (API + Web folders)
-5. [ ] Set up MongoDB with Docker Compose
+4. [x] Set up project structure (API + Web folders)
+5. [x] Set up MongoDB with Docker Compose
 6. [ ] Implement data models (Mongoose schemas)
 7. [ ] Build core API endpoints (CRUD for flags)
 8. [ ] Implement flag evaluation logic (rollout + context rules)
