@@ -309,7 +309,7 @@ const typescriptRules = {
 
 export default [
   {
-    ignores: ["dist", "public", "**.config.{js,ts,cjs}", "**/pet-store.d.ts"],
+    ignores: ["dist", "public", "**.config.{js,ts,cjs}", "**/pet-store.d.ts", "tests/setup-db.ts"],
   },
   {
     languageOptions: {
