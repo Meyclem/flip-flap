@@ -1,5 +1,7 @@
 import express from "express";
 
+import { flagsRouter } from "@/routes/flags.routes.js";
+
 export const createApp = () => {
   const app = express();
 
@@ -8,6 +10,8 @@ export const createApp = () => {
   app.get("/health", (_request, response) => {
     response.json({ status: "ok", timestamp: new Date().toISOString() });
   });
+
+  app.use("/api/flags", flagsRouter);
 
   return app;
 };

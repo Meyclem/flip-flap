@@ -368,16 +368,25 @@ if (result.enabled) {
 ### Phase 2: Implementation (AI-Assisted)
 4. [x] Set up project structure (API + Web folders)
 5. [x] Set up MongoDB with Docker Compose
-6. [ ] Implement data models (Mongoose schemas)
-7. [ ] Build core API endpoints (CRUD for flags)
+6. [x] Implement data models (Mongoose schemas) + Zod validators
+7. [ ] Build CRUD API endpoints:
+   - [ ] `GET /api/flags` - List all flags
+   - [ ] `GET /api/flags/:key` - Get specific flag details
+   - [x] `POST /api/flags` - Create new flag
+   - [ ] `PUT /api/flags/:key` - Update flag
+   - [ ] `DELETE /api/flags/:key` - Delete flag
+   - [ ] `POST /api/keys` - Create API key
+   - [ ] `GET /api/keys` - List API keys
 8. [ ] Implement flag evaluation logic (rollout + context rules)
-9. [ ] Add in-memory caching
-10. [ ] Implement API key authentication
-11. [ ] Build web UI login
-12. [ ] Build web UI flag list and create
-13. [ ] Build web UI flag edit with rollout and rules
-14. [ ] Test end-to-end with example client
-15. [ ] Update documentation if implementation differs from initial design
+9. [ ] Build evaluation endpoint:
+   - [ ] `POST /api/flags/evaluate` - Flag evaluation (uses step 8 logic)
+10. [ ] Add in-memory caching
+11. [ ] Implement API key authentication middleware
+12. [ ] Build web UI login
+13. [ ] Build web UI flag list and create
+14. [ ] Build web UI flag edit with rollout and rules
+15. [ ] Test end-to-end with example client
+16. [ ] Update documentation if implementation differs from initial design
 
 ## Open Questions / Decisions Needed
 
