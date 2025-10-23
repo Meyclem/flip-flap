@@ -1,20 +1,14 @@
 import "dotenv/config";
-import express from "express";
 
 import { connectDatabase } from "@/config/database.js";
-
-const app = express();
-const PORT = process.env.PORT ?? 3000;
-
-app.use(express.json());
-
-app.get("/health", (_request, response) => {
-  response.json({ status: "ok", timestamp: new Date().toISOString() });
-});
+import { createApp } from "@/server.js";
 
 const startServer = async () => {
   try {
     await connectDatabase();
+
+    const app = createApp();
+    const PORT = process.env.PORT ?? 3000;
 
     app.listen(PORT, () => {
       console.log(`🚀 flip-flap API running on port ${PORT}`);
