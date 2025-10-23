@@ -458,6 +458,28 @@ Content-Type: application/json
 
 ## Flag Evaluation Algorithm
 
+### Key Concepts
+
+**The `enabled` field acts as a kill switch:**
+- `enabled: false` → Always disabled, ignore all phases and context rules
+- `enabled: true` → Proceed to context and phase evaluation
+
+**Context rules are always evaluated first (if present):**
+- Context rules filter users before phase/percentage evaluation
+- If context rules fail → disabled (regardless of phases)
+- If context rules pass (or none defined) → proceed to phase evaluation
+
+**The `phases` field controls progressive rollout:**
+- `phases: undefined` or `phases: []` → 100% rollout (after context check)
+- `phases: [{ percentage: 50 }]` → 50% gradual rollout (after context check)
+- `phases: [{ startDate, endDate, percentage }]` → Time-bound rollout
+
+**Common patterns:**
+- `enabled: true, no phases, no context` → Everyone gets it (100%)
+- `enabled: true, no phases, has context` → 100% for users matching context
+- `enabled: true, has phases, no context` → Progressive rollout to everyone
+- `enabled: true, has phases, has context` → Progressive rollout to users matching context
+
 ### Evaluation Flow
 
 The flag evaluation follows this exact sequence (ALL conditions must pass):
@@ -482,18 +504,7 @@ The flag evaluation follows this exact sequence (ALL conditions must pass):
                      │
                      ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 4. Check Date Range (if phases configured)                  │
-│    - Get current UTC time                                   │
-│    - Find active phase where:                               │
-│      startDate <= now AND (endDate is null OR now < endDate)│
-│    - If no active phase → return { enabled: false }         │
-│    - Store active phase percentage for step 6               │
-│    - Note: endDate is exclusive (phase ends before endDate) │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 5. Evaluate Context Rules (if configured)                   │
+│ 4. Evaluate Context Rules (if configured)                   │
 │    - For each rule in contextRules:                         │
 │      - Check if context contains the field                  │
 │      - If missing → return { enabled: false }               │
@@ -504,7 +515,26 @@ The flag evaluation follows this exact sequence (ALL conditions must pass):
                      │
                      ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 6. Deterministic Percentage Check (if percentage configured)│
+│ 5. Check Phases Configuration                               │
+│    - If phases is undefined or empty array:                 │
+│      → return { enabled: true } (100% rollout)              │
+│    - Otherwise, continue to phase evaluation                │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 6. Check Date Range (phases configured)                     │
+│    - Get current UTC time                                   │
+│    - Find active phase where:                               │
+│      startDate <= now AND (endDate is null OR now < endDate)│
+│    - If no active phase → return { enabled: false }         │
+│    - Store active phase percentage for step 7               │
+│    - Note: endDate is exclusive (phase ends before endDate) │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 7. Deterministic Percentage Check (if percentage configured)│
 │    - Require userId in context                              │
 │    - Hash seed = userId + ":" + flagKey                     │
 │    - Calculate: hash = crypto.createHash('md5')             │
@@ -517,7 +547,7 @@ The flag evaluation follows this exact sequence (ALL conditions must pass):
                      │
                      ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 7. Return Result                                            │
+│ 8. Return Result                                            │
 │    { enabled, metadata }                                    │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -609,6 +639,93 @@ function evaluatePercentage(
 // evaluatePercentage('user_12345', 'premium-dashboard', 30)
 // → Always returns the same result for this user + flag combination
 // → Across large user base, ~30% will get true
+```
+
+### Evaluation Examples
+
+**Example 1: Simple ON flag (everyone gets it)**
+```json
+{
+  "enabled": true
+}
+// Result: { enabled: true } for all users
+```
+
+**Example 2: Context-based targeting (no phases)**
+```json
+{
+  "enabled": true,
+  "contextRules": {
+    "location": { "oneOf": ["US", "EU"] },
+    "planType": { "eq": "premium" }
+  }
+}
+// User from US with premium plan: { enabled: true }
+// User from UK with premium plan: { enabled: false }
+// User from US with free plan: { enabled: false }
+```
+
+**Example 3: Percentage rollout (no context)**
+```json
+{
+  "enabled": true,
+  "phases": [{ "percentage": 30 }]
+}
+// 30% of users get { enabled: true }
+// 70% of users get { enabled: false }
+// Same user always gets same result
+```
+
+**Example 4: Context + Percentage (progressive rollout to specific users)**
+```json
+{
+  "enabled": true,
+  "contextRules": {
+    "location": { "eq": "US" },
+    "planType": { "eq": "premium" }
+  },
+  "phases": [{ "percentage": 50 }]
+}
+// Step 1: Check if user is from US with premium plan
+// Step 2: If yes, check if user is in the 50% bucket
+// US premium users: 50% get { enabled: true }
+// All other users: { enabled: false }
+```
+
+**Example 5: Time-bound rollout**
+```json
+{
+  "enabled": true,
+  "phases": [
+    {
+      "startDate": "2025-01-01T00:00:00Z",
+      "endDate": "2025-01-07T00:00:00Z",
+      "percentage": 25
+    },
+    {
+      "startDate": "2025-01-07T00:00:00Z",
+      "endDate": "2025-01-14T00:00:00Z",
+      "percentage": 50
+    },
+    {
+      "startDate": "2025-01-14T00:00:00Z",
+      "percentage": 100
+    }
+  ]
+}
+// Week 1 (Jan 1-7): 25% of users
+// Week 2 (Jan 7-14): 50% of users
+// Week 3+ (Jan 14+): 100% of users
+```
+
+**Example 6: Kill switch**
+```json
+{
+  "enabled": false,
+  "phases": [{ "percentage": 100 }]
+}
+// Result: { enabled: false } for all users
+// Phases are ignored when enabled: false
 ```
 
 ---

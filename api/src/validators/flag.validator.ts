@@ -12,7 +12,8 @@ export const operatorExpressionSchema = z.object({
 });
 
 export const phaseSchema = z.object({
-  startDate: z.string().datetime(),
+  startDate: z.string().datetime()
+    .default(() => new Date().toISOString()),
   endDate: z.string().datetime()
     .optional(),
   percentage: z.number().min(0)
@@ -34,7 +35,7 @@ function phasesOverlap(
 export const environmentConfigSchema = z
   .object({
     enabled: z.boolean(),
-    phases: z.array(phaseSchema).min(1)
+    phases: z.array(phaseSchema)
       .optional(),
     contextRules: z.record(z.string(), operatorExpressionSchema).optional(),
   })

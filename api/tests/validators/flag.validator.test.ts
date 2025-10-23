@@ -132,6 +132,33 @@ describe("phaseSchema", () => {
     });
     expect(result.success).toBe(true);
   });
+
+  it("should use current timestamp as default startDate when omitted", () => {
+    const beforeParse = new Date();
+    const result = phaseSchema.safeParse({
+      percentage: 50,
+    });
+    const afterParse = new Date();
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      const parsedDate = new Date(result.data.startDate);
+      expect(parsedDate.getTime()).toBeGreaterThanOrEqual(beforeParse.getTime());
+      expect(parsedDate.getTime()).toBeLessThanOrEqual(afterParse.getTime());
+    }
+  });
+
+  it("should allow percentage-only phase without dates", () => {
+    const result = phaseSchema.safeParse({
+      percentage: 100,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.startDate).toBeDefined();
+      expect(result.data.endDate).toBeUndefined();
+      expect(result.data.percentage).toBe(100);
+    }
+  });
 });
 
 describe("environmentConfigSchema", () => {
@@ -219,12 +246,12 @@ describe("environmentConfigSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("should reject empty phases array", () => {
+  it("should accept empty phases array", () => {
     const result = environmentConfigSchema.safeParse({
       enabled: false,
       phases: [],
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("should accept config with context rules", () => {
