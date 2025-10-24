@@ -79,13 +79,13 @@ This project follows a **documentation-first approach** to enable better AI-assi
   - Output: Single result OR array of results with boolean enabled + metadata per flag
   - Environment inferred from API key
   - Supports both single and bulk evaluation
-- [ ] `GET /api/flags` - List all flags (for UI)
-- [ ] `GET /api/flags/:key` - Get specific flag details
-- [ ] `POST /api/flags` - Create new flag
-- [ ] `PUT /api/flags/:key` - Update flag (with Zod validation for overlapping phases)
-- [ ] `DELETE /api/flags/:key` - Delete flag
-- [ ] `POST /api/keys` - Create API key for environment
-- [ ] `GET /api/keys` - List API keys
+- [x] `GET /api/flags` - List all flags (for UI)
+- [x] `GET /api/flags/:key` - Get specific flag details
+- [x] `POST /api/flags` - Create new flag
+- [x] `PUT /api/flags/:key` - Update flag (with Zod validation for overlapping phases)
+- [x] `DELETE /api/flags/:key` - Delete flag
+- [x] `POST /api/keys` - Create API key for environment
+- [x] `GET /api/keys` - List API keys
 
 **DECISION: Validation with Zod**
 - All request/response validation using Zod schemas
@@ -369,14 +369,14 @@ if (result.enabled) {
 4. [x] Set up project structure (API + Web folders)
 5. [x] Set up MongoDB with Docker Compose
 6. [x] Implement data models (Mongoose schemas) + Zod validators
-7. [ ] Build CRUD API endpoints:
+7. [x] Build CRUD API endpoints:
    - [x] `GET /api/flags` - List all flags
    - [x] `GET /api/flags/:key` - Get specific flag details
    - [x] `POST /api/flags` - Create new flag
    - [x] `PUT /api/flags/:key` - Update flag
    - [x] `DELETE /api/flags/:key` - Delete flag
-   - [ ] `POST /api/keys` - Create API key
-   - [ ] `GET /api/keys` - List API keys
+   - [x] `POST /api/keys` - Create API key
+   - [x] `GET /api/keys` - List API keys
 8. [ ] Implement flag evaluation logic (rollout + context rules)
 9. [ ] Build evaluation endpoint:
    - [ ] `POST /api/flags/evaluate` - Flag evaluation (uses step 8 logic)

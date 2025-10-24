@@ -1,6 +1,7 @@
 import express from "express";
 
 import { errorHandler } from "@/middleware/error-handler.middleware.js";
+import { apiKeysRouter } from "@/routes/api-keys.routes.js";
 import { flagsRouter } from "@/routes/flags.routes.js";
 
 export const createApp = () => {
@@ -13,6 +14,7 @@ export const createApp = () => {
   });
 
   app.use("/api/flags", flagsRouter);
+  app.use("/api/keys", apiKeysRouter);
 
   app.use(errorHandler);
 
