@@ -1,5 +1,6 @@
 import express from "express";
 
+import { errorHandler } from "@/middleware/error-handler.middleware.js";
 import { flagsRouter } from "@/routes/flags.routes.js";
 
 export const createApp = () => {
@@ -12,6 +13,8 @@ export const createApp = () => {
   });
 
   app.use("/api/flags", flagsRouter);
+
+  app.use(errorHandler);
 
   return app;
 };

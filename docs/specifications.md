@@ -206,23 +206,40 @@ Content-Type: application/json
 - `200 OK`: Successful evaluation
 - `400 Bad Request`: Invalid request body (Zod validation error)
 - `401 Unauthorized`: Invalid or missing API key
+- `404 Not Found`: Flag does not exist
 - `500 Internal Server Error`: Server error
 
-**Error Response Format:**
+**Error Response Format (RFC 7807 Problem Details):**
+
+All error responses follow the [RFC 7807 Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc7807) standard:
+
 ```json
 {
-  "error": {
-    "code": "INVALID_API_KEY",
-    "message": "The provided API key is invalid or missing"
-  }
+  "type": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400",
+  "title": "Bad Request",
+  "detail": "Invalid request body",
+  "instance": "/api/flags/evaluate"
 }
 ```
 
-**Error Codes:**
-- `INVALID_API_KEY`: API key not found or malformed
-- `VALIDATION_ERROR`: Request body validation failed
-- `FLAG_NOT_FOUND`: Requested flag does not exist
-- `INTERNAL_ERROR`: Unexpected server error
+**Validation Error Example (with multiple issues):**
+```json
+{
+  "type": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400",
+  "title": "Bad Request",
+  "detail": [
+    "flagKey: Flag key must contain only lowercase letters, numbers, hyphens, and underscores",
+    "percentage: Too big: expected number to be <=100"
+  ],
+  "instance": "/api/flags"
+}
+```
+
+**Field Descriptions:**
+- `type`: URI reference identifying the problem type (defaults to MDN HTTP status documentation)
+- `title`: Short, human-readable summary of the problem type
+- `detail`: Human-readable explanation specific to this occurrence (string or array for validation errors)
+- `instance`: URI reference identifying the specific occurrence of the problem
 
 ---
 

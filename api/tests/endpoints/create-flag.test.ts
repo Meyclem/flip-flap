@@ -65,8 +65,9 @@ describe("POST /api/flags", () => {
       .send(flagData);
 
     expect(response.status).toBe(409);
-    expect(response.body).toHaveProperty("error");
-    expect(response.body.error).toContain("already exists");
+    expect(response.body).toHaveProperty("title", "Conflict");
+    expect(response.body).toHaveProperty("detail");
+    expect(response.body.detail).toContain("already exists");
   });
 
   it("should reject invalid flag key format", async () => {
@@ -84,8 +85,8 @@ describe("POST /api/flags", () => {
       .send(flagData);
 
     expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("error", "Validation failed");
-    expect(response.body).toHaveProperty("details");
+    expect(response.body).toHaveProperty("title", "Bad Request");
+    expect(response.body).toHaveProperty("detail");
   });
 
   it("should reject missing required fields", async () => {
@@ -97,8 +98,8 @@ describe("POST /api/flags", () => {
       .send(flagData);
 
     expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("error", "Validation failed");
-    expect(response.body).toHaveProperty("details");
+    expect(response.body).toHaveProperty("title", "Bad Request");
+    expect(response.body).toHaveProperty("detail");
   });
 
   it("should reject overlapping phase date ranges", async () => {
@@ -130,13 +131,10 @@ describe("POST /api/flags", () => {
       .send(flagData);
 
     expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("error", "Validation failed");
-    expect(response.body.details).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          message: "Phase date ranges must not overlap",
-        }),
-      ]),
+    expect(response.body).toHaveProperty("title", "Bad Request");
+    expect(response.body).toHaveProperty("detail");
+    expect(response.body.detail).toEqual(
+      expect.arrayContaining([expect.stringContaining("Phase date ranges must not overlap")]),
     );
   });
 
@@ -231,7 +229,7 @@ describe("POST /api/flags", () => {
       .send(flagData);
 
     expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("error", "Validation failed");
+    expect(response.body).toHaveProperty("title", "Bad Request");
   });
 
   it("should accept empty phases array", async () => {
