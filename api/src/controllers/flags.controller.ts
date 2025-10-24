@@ -50,6 +50,19 @@ export const updateFlag = async (request: Request, response: Response) => {
   return response.status(200).json(flag);
 };
 
+export const deleteFlag = async (request: Request, response: Response) => {
+  const { key } = request.params;
+  const organizationId = response.locals.organizationId ?? new Types.ObjectId("000000000000000000000001");
+
+  const result = await Flag.deleteOne({ organizationId, flagKey: key });
+
+  if (result.deletedCount === 0) {
+    throw new NotFoundError(`Flag with key '${key}' not found`);
+  }
+
+  return response.status(204).send();
+};
+
 export const createFlag = async (request: Request, response: Response) => {
   const validationResult = createFlagSchema.safeParse(request.body);
 

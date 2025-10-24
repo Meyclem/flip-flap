@@ -374,7 +374,7 @@ if (result.enabled) {
    - [x] `GET /api/flags/:key` - Get specific flag details
    - [x] `POST /api/flags` - Create new flag
    - [x] `PUT /api/flags/:key` - Update flag
-   - [ ] `DELETE /api/flags/:key` - Delete flag
+   - [x] `DELETE /api/flags/:key` - Delete flag
    - [ ] `POST /api/keys` - Create API key
    - [ ] `GET /api/keys` - List API keys
 8. [ ] Implement flag evaluation logic (rollout + context rules)
