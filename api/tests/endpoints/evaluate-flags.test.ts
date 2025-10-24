@@ -1,13 +1,18 @@
 import request from "supertest";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, beforeEach } from "vitest";
 
 import { createApp } from "../../src/server";
+import { cacheService } from "../../src/services/cache.service";
 import { setupTestDatabase } from "../setup-db";
 
 describe("POST /api/flags/evaluate", () => {
   const app = createApp();
 
   setupTestDatabase();
+
+  beforeEach(async () => {
+    await cacheService.invalidate();
+  });
 
   describe("Single flag evaluation", () => {
     it("should evaluate enabled flag without phases or rules", async () => {
@@ -408,6 +413,147 @@ describe("POST /api/flags/evaluate", () => {
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("title", "Bad Request");
+    });
+  });
+
+  describe("Cache integration", () => {
+    it("should use cache after first evaluation", async () => {
+      await request(app).post("/api/flags")
+        .send({
+          flagKey: "cached-flag",
+          name: "Cached Flag",
+          environments: {
+            development: { enabled: true },
+            staging: { enabled: false },
+            production: { enabled: false },
+          },
+        });
+
+      const response1 = await request(app)
+        .post("/api/flags/evaluate")
+        .send({
+          flagKey: "cached-flag",
+          context: { userId: "user123" },
+        });
+
+      expect(response1.status).toBe(200);
+      expect(response1.body.enabled).toBe(true);
+
+      const response2 = await request(app)
+        .post("/api/flags/evaluate")
+        .send({
+          flagKey: "cached-flag",
+          context: { userId: "user123" },
+        });
+
+      expect(response2.status).toBe(200);
+      expect(response2.body.enabled).toBe(true);
+    });
+
+    it("should invalidate cache when flag is updated", async () => {
+      await request(app).post("/api/flags")
+        .send({
+          flagKey: "update-test-flag",
+          name: "Update Test Flag",
+          environments: {
+            development: { enabled: false },
+            staging: { enabled: false },
+            production: { enabled: false },
+          },
+        });
+
+      const response1 = await request(app)
+        .post("/api/flags/evaluate")
+        .send({
+          flagKey: "update-test-flag",
+          context: { userId: "user123" },
+        });
+
+      expect(response1.body.enabled).toBe(false);
+
+      await request(app).put("/api/flags/update-test-flag")
+        .send({
+          environments: {
+            development: { enabled: true },
+            staging: { enabled: false },
+            production: { enabled: false },
+          },
+        });
+
+      const response2 = await request(app)
+        .post("/api/flags/evaluate")
+        .send({
+          flagKey: "update-test-flag",
+          context: { userId: "user123" },
+        });
+
+      expect(response2.body.enabled).toBe(true);
+    });
+
+    it("should invalidate cache when flag is deleted", async () => {
+      await request(app).post("/api/flags")
+        .send({
+          flagKey: "delete-test-flag",
+          name: "Delete Test Flag",
+          environments: {
+            development: { enabled: true },
+            staging: { enabled: false },
+            production: { enabled: false },
+          },
+        });
+
+      const response1 = await request(app)
+        .post("/api/flags/evaluate")
+        .send({
+          flagKey: "delete-test-flag",
+          context: { userId: "user123" },
+        });
+
+      expect(response1.body.enabled).toBe(true);
+
+      await request(app).delete("/api/flags/delete-test-flag");
+
+      const response2 = await request(app)
+        .post("/api/flags/evaluate")
+        .send({
+          flagKey: "delete-test-flag",
+          context: { userId: "user123" },
+        });
+
+      expect(response2.body.enabled).toBe(false);
+      expect(response2.body.metadata.reason).toBe("flag_not_found");
+    });
+
+    it("should invalidate cache when flag is created", async () => {
+      const response1 = await request(app)
+        .post("/api/flags/evaluate")
+        .send({
+          flagKey: "new-cache-flag",
+          context: { userId: "user123" },
+        });
+
+      expect(response1.body.enabled).toBe(false);
+      expect(response1.body.metadata.reason).toBe("flag_not_found");
+
+      await request(app).post("/api/flags")
+        .send({
+          flagKey: "new-cache-flag",
+          name: "New Cache Flag",
+          environments: {
+            development: { enabled: true },
+            staging: { enabled: false },
+            production: { enabled: false },
+          },
+        });
+
+      const response2 = await request(app)
+        .post("/api/flags/evaluate")
+        .send({
+          flagKey: "new-cache-flag",
+          context: { userId: "user123" },
+        });
+
+      expect(response2.body.enabled).toBe(true);
     });
   });
 });

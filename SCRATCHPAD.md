@@ -215,14 +215,19 @@ All conditions must pass (AND logic):
 ## Cache Strategy
 
 ### Simple In-Memory Cache (POC)
-- [ ] Use in-memory cache (Node.js Map or similar)
-- [ ] Cache all flags on API startup
-- [ ] Invalidate entire cache when any flag changes
-- [ ] TTL: 60 seconds fallback refresh
+- [x] Use in-memory cache (Node.js Map or similar)
+- [x] Cache all flags on API startup
+- [x] Selective cache updates (per flag) - **IMPLEMENTED INSTEAD OF FULL INVALIDATION**
+- [x] TTL: 60 seconds fallback refresh
+
+**IMPLEMENTATION NOTES:**
+- Composite cache keys: `organizationId:flagKey` for multi-org isolation
+- Selective updates via `set()` and `delete()` methods (no race conditions)
+- Full `invalidate()` kept for emergency/manual clearing
+- 20 unit tests + 4 integration tests
 
 ### Future Considerations (not POC):
 - [ ] Redis for multi-instance deployments
-- [ ] Selective cache invalidation (per flag)
 - [ ] CDN caching for edge locations
 
 ## Environment Management
@@ -380,7 +385,7 @@ if (result.enabled) {
 8. [x] Implement flag evaluation logic (rollout + context rules)
 9. [x] Build evaluation endpoint:
    - [x] `POST /api/flags/evaluate` - Flag evaluation (uses step 8 logic)
-10. [ ] Add in-memory caching
+10. [x] Add in-memory caching
 11. [ ] Implement API key authentication middleware
 12. [ ] Build web UI login
 13. [ ] Build web UI flag list and create

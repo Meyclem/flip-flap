@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { Types } from "mongoose";
 
 import { Flag } from "@/models/flag.model.js";
+import { cacheService } from "@/services/cache.service.js";
 import type { EvaluationContext } from "@/services/evaluator.js";
 import { evaluateFlag } from "@/services/evaluator.js";
 import { ConflictError, NotFoundError } from "@/utils/errors.js";
@@ -49,6 +50,7 @@ export const updateFlag = async (request: Request, response: Response) => {
 
   Object.assign(flag, updateData);
   await flag.save();
+  cacheService.set(organizationId, flag.flagKey, flag);
 
   return response.status(200).json(flag);
 };
@@ -57,11 +59,17 @@ export const deleteFlag = async (request: Request, response: Response) => {
   const { key } = request.params;
   const organizationId = response.locals.organizationId ?? new Types.ObjectId("000000000000000000000001");
 
+  if (!key) {
+    throw new NotFoundError("Flag key is required");
+  }
+
   const result = await Flag.deleteOne({ organizationId, flagKey: key });
 
   if (result.deletedCount === 0) {
     throw new NotFoundError(`Flag with key '${key}' not found`);
   }
+
+  cacheService.delete(organizationId, key);
 
   return response.status(204).send();
 };
@@ -90,6 +98,8 @@ export const createFlag = async (request: Request, response: Response) => {
     environments,
   });
 
+  cacheService.set(organizationId, flagKey, flag);
+
   return response.status(201).json(flag);
 };
 
@@ -105,7 +115,7 @@ export const evaluateFlags = async (request: Request, response: Response) => {
   const environment = (response.locals.environment ?? "development");
 
   try {
-    const flag = await Flag.findOne({ organizationId, flagKey });
+    const flag = await cacheService.get(organizationId, flagKey);
 
     if (!flag) {
       return response.status(200).json({
