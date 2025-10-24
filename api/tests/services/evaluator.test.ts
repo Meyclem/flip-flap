@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { describe, expect, it } from "vitest";
 
 import type { IEnvironmentConfig, IOperatorExpression } from "../../src/models/flag.model.js";
@@ -196,6 +198,42 @@ describe("evaluateFlag", () => {
   });
 
   describe("deterministic percentage rollout", () => {
+    it("should distribute users evenly across percentage rollouts", () => {
+      const testCases = [
+        { percentage: 10, tolerance: 2 },
+        { percentage: 30, tolerance: 2 },
+        { percentage: 50, tolerance: 2 },
+        { percentage: 75, tolerance: 2 },
+      ];
+
+      for (const { percentage, tolerance } of testCases) {
+        const config: IEnvironmentConfig = {
+          enabled: true,
+          phases: [
+            {
+              startDate: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+              percentage,
+            },
+          ],
+        };
+
+        let enabledCount = 0;
+        const iterations = 10000;
+
+        for (let i = 0; i < iterations; i += 1) {
+          const result = evaluateFlag("test-flag", config, { userId: randomUUID() });
+          if (result.enabled) {
+            enabledCount += 1;
+          }
+        }
+
+        const actualPercentage = (enabledCount / iterations) * 100;
+
+        expect(actualPercentage).toBeGreaterThanOrEqual(percentage - tolerance);
+        expect(actualPercentage).toBeLessThanOrEqual(percentage + tolerance);
+      }
+    });
+
     it("should consistently return same result for same userId and flagKey", () => {
       const config: IEnvironmentConfig = {
         enabled: true,
