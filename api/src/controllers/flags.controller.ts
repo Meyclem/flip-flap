@@ -3,7 +3,7 @@ import { Types } from "mongoose";
 
 import { Flag } from "@/models/flag.model.js";
 import { ConflictError, NotFoundError } from "@/utils/errors.js";
-import { createFlagSchema } from "@/validators/flag.validator.js";
+import { createFlagSchema, updateFlagSchema } from "@/validators/flag.validator.js";
 
 export const listFlags = async (_request: Request, response: Response) => {
   const organizationId = response.locals.organizationId ?? new Types.ObjectId("000000000000000000000001");
@@ -22,6 +22,30 @@ export const getFlag = async (request: Request, response: Response) => {
   if (!flag) {
     throw new NotFoundError(`Flag with key '${key}' not found`);
   }
+
+  return response.status(200).json(flag);
+};
+
+export const updateFlag = async (request: Request, response: Response) => {
+  const { key } = request.params;
+  const organizationId = response.locals.organizationId ?? new Types.ObjectId("000000000000000000000001");
+
+  const validationResult = updateFlagSchema.safeParse(request.body);
+
+  if (!validationResult.success) {
+    throw validationResult.error;
+  }
+
+  const flag = await Flag.findOne({ organizationId, flagKey: key });
+
+  if (!flag) {
+    throw new NotFoundError(`Flag with key '${key}' not found`);
+  }
+
+  const updateData = validationResult.data;
+
+  Object.assign(flag, updateData);
+  await flag.save();
 
   return response.status(200).json(flag);
 };

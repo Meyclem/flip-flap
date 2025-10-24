@@ -373,7 +373,7 @@ if (result.enabled) {
    - [x] `GET /api/flags` - List all flags
    - [x] `GET /api/flags/:key` - Get specific flag details
    - [x] `POST /api/flags` - Create new flag
-   - [ ] `PUT /api/flags/:key` - Update flag
+   - [x] `PUT /api/flags/:key` - Update flag
    - [ ] `DELETE /api/flags/:key` - Delete flag
    - [ ] `POST /api/keys` - Create API key
    - [ ] `GET /api/keys` - List API keys
