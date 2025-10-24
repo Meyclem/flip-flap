@@ -74,11 +74,11 @@ This project follows a **documentation-first approach** to enable better AI-assi
 - Separate collection for API keys with fields: key, environment, organizationId, description, createdAt
 
 ### Core Endpoints
-- [ ] `POST /api/flags/evaluate` - Main endpoint to check if flag is enabled for a given context
-  - Input: flagKey OR flagKeys (array), context (user ID, location, custom fields) - NO environment sent by client
-  - Output: Single result OR array of results with boolean enabled + metadata per flag
+- [x] `POST /api/flags/evaluate` - Main endpoint to check if flag is enabled for a given context
+  - Input: flagKey (single flag), context (user ID, location, custom fields) - NO environment sent by client
+  - Output: Single result with boolean enabled + metadata
   - Environment inferred from API key
-  - Supports both single and bulk evaluation
+  - Single flag evaluation only (per specifications)
 - [x] `GET /api/flags` - List all flags (for UI)
 - [x] `GET /api/flags/:key` - Get specific flag details
 - [x] `POST /api/flags` - Create new flag
@@ -93,8 +93,8 @@ This project follows a **documentation-first approach** to enable better AI-assi
 - Flag evaluation never errors - returns `enabled: false` for any validation/context issues
 
 ### Questions to Answer:
-- [x] Do we need bulk evaluation endpoint? → Yes, support array of flagKeys in single request
-- [x] Should evaluate endpoint return all flags or just one? → Support both single and bulk
+- [x] Do we need bulk evaluation endpoint? → No, single flag evaluation only (per specifications)
+- [x] Should evaluate endpoint return all flags or just one? → Single flag only
 - [x] How do we handle flag not found errors? → Return `enabled: false` for that flag (fail-safe)
 
 ## Progressive Rollout Mechanics
@@ -378,8 +378,8 @@ if (result.enabled) {
    - [x] `POST /api/keys` - Create API key
    - [x] `GET /api/keys` - List API keys
 8. [x] Implement flag evaluation logic (rollout + context rules)
-9. [ ] Build evaluation endpoint:
-   - [ ] `POST /api/flags/evaluate` - Flag evaluation (uses step 8 logic)
+9. [x] Build evaluation endpoint:
+   - [x] `POST /api/flags/evaluate` - Flag evaluation (uses step 8 logic)
 10. [ ] Add in-memory caching
 11. [ ] Implement API key authentication middleware
 12. [ ] Build web UI login

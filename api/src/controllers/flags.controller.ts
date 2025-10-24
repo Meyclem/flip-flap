@@ -2,7 +2,10 @@ import type { Request, Response } from "express";
 import { Types } from "mongoose";
 
 import { Flag } from "@/models/flag.model.js";
+import type { EvaluationContext } from "@/services/evaluator.js";
+import { evaluateFlag } from "@/services/evaluator.js";
 import { ConflictError, NotFoundError } from "@/utils/errors.js";
+import { evaluateFlagSchema } from "@/validators/evaluate.validator.js";
 import { createFlagSchema, updateFlagSchema } from "@/validators/flag.validator.js";
 
 export const listFlags = async (_request: Request, response: Response) => {
@@ -88,4 +91,51 @@ export const createFlag = async (request: Request, response: Response) => {
   });
 
   return response.status(201).json(flag);
+};
+
+export const evaluateFlags = async (request: Request, response: Response) => {
+  const validationResult = evaluateFlagSchema.safeParse(request.body);
+
+  if (!validationResult.success) {
+    throw validationResult.error;
+  }
+
+  const { flagKey, context } = validationResult.data;
+  const organizationId = response.locals.organizationId ?? new Types.ObjectId("000000000000000000000001");
+  const environment = (response.locals.environment ?? "development");
+
+  try {
+    const flag = await Flag.findOne({ organizationId, flagKey });
+
+    if (!flag) {
+      return response.status(200).json({
+        flagKey,
+        enabled: false,
+        metadata: { reason: "flag_not_found" },
+      });
+    }
+
+    const envConfig = flag.environments[environment as keyof typeof flag.environments];
+
+    if (!envConfig) {
+      return response.status(200).json({
+        flagKey,
+        enabled: false,
+        metadata: { reason: "environment_not_configured" },
+      });
+    }
+
+    const result = evaluateFlag(flagKey, envConfig, context as EvaluationContext);
+
+    return response.status(200).json({
+      flagKey,
+      ...result,
+    });
+  } catch {
+    return response.status(200).json({
+      flagKey,
+      enabled: false,
+      metadata: { reason: "evaluation_error" },
+    });
+  }
 };
