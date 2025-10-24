@@ -552,7 +552,9 @@ The flag evaluation follows this exact sequence (ALL conditions must pass):
                      ▼
 ┌─────────────────────────────────────────────────────────────┐
 │ 7. Deterministic Percentage Check (if percentage configured)│
-│    - Require userId in context                              │
+│    - If percentage < 100 AND userId is undefined:           │
+│      → return { enabled: false, reason: "missing_user_id" } │
+│    - If percentage === 100, userId not required             │
 │    - Hash seed = userId + ":" + flagKey                     │
 │    - Calculate: hash = crypto.createHash('md5')             │
 │                       .update(seed).digest('hex')           │
@@ -560,6 +562,7 @@ The flag evaluation follows this exact sequence (ALL conditions must pass):
 │    - If bucket < percentage → enabled = true                │
 │    - Else → enabled = false                                 │
 │    - Result is consistent for same user + flag              │
+│    - Note: Empty string userId is hashed (consumer data)    │
 └────────────────────┬────────────────────────────────────────┘
                      │
                      ▼
@@ -568,6 +571,28 @@ The flag evaluation follows this exact sequence (ALL conditions must pass):
 │    { enabled, metadata }                                    │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+### Fail-Safe Behavior
+
+The evaluator is designed with **defense in depth** - validation rejects invalid data at creation time, but the evaluator also fails-safe if invalid data somehow gets through:
+
+**Validation Layer (Zod):**
+- Empty arrays in `oneOf`/`notOneOf` → Rejected at creation
+- Unknown operators → Rejected (strict mode)
+- Empty flagKey → Rejected (min length 1)
+- Overlapping phases → Rejected
+
+**Evaluator Fail-Safe:**
+- Unknown operators → Returns `false` (context_rules_not_matched)
+- All operators undefined → Returns `false` (no valid operators)
+- Missing required context field → Returns `false`
+- Missing userId with percentage < 100 → Returns `false` (missing_user_id)
+- No active phase when phases configured → Returns `false`
+- Invalid data quality (empty strings, etc.) → Consumer's responsibility, we hash it
+
+**Data Quality Philosophy:**
+- **Our responsibility**: Structure and logic validation
+- **Not our responsibility**: Consumer's data quality (e.g., `userId: "undefined"` as a string is hashed deterministically)
 
 ### Context Rule Evaluation
 
@@ -853,9 +878,9 @@ const OperatorExpressionSchema = z.object({
   gte: z.number().optional(),
   lt: z.number().optional(),
   lte: z.number().optional(),
-  oneOf: z.array(z.union([z.string(), z.number()])).optional(),
-  notOneOf: z.array(z.union([z.string(), z.number()])).optional()
-});
+  oneOf: z.array(z.union([z.string(), z.number()])).min(1).optional(),  // Must have at least 1 item if provided
+  notOneOf: z.array(z.union([z.string(), z.number()])).min(1).optional()  // Must have at least 1 item if provided
+}).strict();  // Reject unknown operators
 
 const PhaseSchema = z.object({
   startDate: z.string().datetime(),

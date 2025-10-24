@@ -377,7 +377,7 @@ if (result.enabled) {
    - [x] `DELETE /api/flags/:key` - Delete flag
    - [x] `POST /api/keys` - Create API key
    - [x] `GET /api/keys` - List API keys
-8. [ ] Implement flag evaluation logic (rollout + context rules)
+8. [x] Implement flag evaluation logic (rollout + context rules)
 9. [ ] Build evaluation endpoint:
    - [ ] `POST /api/flags/evaluate` - Flag evaluation (uses step 8 logic)
 10. [ ] Add in-memory caching

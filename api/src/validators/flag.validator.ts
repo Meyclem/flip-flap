@@ -7,9 +7,11 @@ export const operatorExpressionSchema = z.object({
   gte: z.number().optional(),
   lt: z.number().optional(),
   lte: z.number().optional(),
-  oneOf: z.array(z.union([z.string(), z.number()])).optional(),
-  notOneOf: z.array(z.union([z.string(), z.number()])).optional(),
-});
+  oneOf: z.array(z.union([z.string(), z.number()])).min(1)
+    .optional(),
+  notOneOf: z.array(z.union([z.string(), z.number()])).min(1)
+    .optional(),
+}).strict();
 
 export const phaseSchema = z.object({
   startDate: z.string().datetime()

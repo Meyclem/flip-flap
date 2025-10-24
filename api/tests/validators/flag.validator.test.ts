@@ -59,6 +59,36 @@ describe("operatorExpressionSchema", () => {
     });
     expect(result.success).toBe(true);
   });
+
+  it("should reject empty array in oneOf", () => {
+    const result = operatorExpressionSchema.safeParse({
+      oneOf: [],
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].path).toContain("oneOf");
+    }
+  });
+
+  it("should reject empty array in notOneOf", () => {
+    const result = operatorExpressionSchema.safeParse({
+      notOneOf: [],
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].path).toContain("notOneOf");
+    }
+  });
+
+  it("should reject unknown operators (strict mode)", () => {
+    const result = operatorExpressionSchema.safeParse({
+      unknownOperator: "value",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].code).toBe("unrecognized_keys");
+    }
+  });
 });
 
 describe("phaseSchema", () => {
