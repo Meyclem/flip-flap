@@ -371,7 +371,7 @@ if (result.enabled) {
 6. [x] Implement data models (Mongoose schemas) + Zod validators
 7. [ ] Build CRUD API endpoints:
    - [x] `GET /api/flags` - List all flags
-   - [ ] `GET /api/flags/:key` - Get specific flag details
+   - [x] `GET /api/flags/:key` - Get specific flag details
    - [x] `POST /api/flags` - Create new flag
    - [ ] `PUT /api/flags/:key` - Update flag
    - [ ] `DELETE /api/flags/:key` - Delete flag
