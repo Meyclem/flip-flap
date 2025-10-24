@@ -5,6 +5,14 @@ import { Flag } from "@/models/flag.model.js";
 import { ConflictError } from "@/utils/errors.js";
 import { createFlagSchema } from "@/validators/flag.validator.js";
 
+export const listFlags = async (_request: Request, response: Response) => {
+  const organizationId = response.locals.organizationId ?? new Types.ObjectId("000000000000000000000001");
+
+  const flags = await Flag.find({ organizationId }).sort({ createdAt: -1 });
+
+  return response.status(200).json(flags);
+};
+
 export const createFlag = async (request: Request, response: Response) => {
   const validationResult = createFlagSchema.safeParse(request.body);
 

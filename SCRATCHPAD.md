@@ -370,7 +370,7 @@ if (result.enabled) {
 5. [x] Set up MongoDB with Docker Compose
 6. [x] Implement data models (Mongoose schemas) + Zod validators
 7. [ ] Build CRUD API endpoints:
-   - [ ] `GET /api/flags` - List all flags
+   - [x] `GET /api/flags` - List all flags
    - [ ] `GET /api/flags/:key` - Get specific flag details
    - [x] `POST /api/flags` - Create new flag
    - [ ] `PUT /api/flags/:key` - Update flag
