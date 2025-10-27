@@ -1,6 +1,6 @@
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose, { Types } from "mongoose";
-import { afterAll, afterEach, beforeAll } from "vitest";
+import { afterAll, beforeAll, beforeEach } from "vitest";
 
 import { ApiKey } from "../src/models/api-key.model";
 

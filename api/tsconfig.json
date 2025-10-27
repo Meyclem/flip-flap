@@ -50,7 +50,7 @@
     "incremental": true,
     "tsBuildInfoFile": "./.tsbuildinfo"
   },
-  "include": ["src/**/*", "examples/**/*"],
+  "include": ["src/**/*", "scripts/**/*", "examples/**/*"],
   "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"],
   "ts-node": {
     "esm": true,

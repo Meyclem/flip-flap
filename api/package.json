@@ -24,7 +24,8 @@
     "test": "vitest run --coverage",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest run --coverage",
-    "test:coverage:watch": "vitest run --coverage --watch"
+    "test:coverage:watch": "vitest run --coverage --watch",
+    "seed:dev": "tsx scripts/seed-dev.ts"
   },
   "dependencies": {
     "dotenv": "17.2.3",
