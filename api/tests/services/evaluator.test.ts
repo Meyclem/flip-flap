@@ -797,10 +797,59 @@ describe("evaluateFlag", () => {
       expect(result.enabled).toBe(false);
       expect(result.metadata.reason).toBe("context_rules_not_matched");
     });
+
+    it("should match eq operator with boolean value", () => {
+      const config: IEnvironmentConfig = {
+        enabled: true,
+        contextRules: {
+          isPremium: { eq: true },
+        },
+      };
+
+      const result = evaluateFlag("test-flag", config, {
+        userId: "user123",
+        isPremium: true,
+      });
+
+      expect(result.enabled).toBe(true);
+    });
+
+    it("should not match eq operator with different boolean value", () => {
+      const config: IEnvironmentConfig = {
+        enabled: true,
+        contextRules: {
+          isPremium: { eq: true },
+        },
+      };
+
+      const result = evaluateFlag("test-flag", config, {
+        userId: "user123",
+        isPremium: false,
+      });
+
+      expect(result.enabled).toBe(false);
+      expect(result.metadata.reason).toBe("context_rules_not_matched");
+    });
+
+    it("should match neq operator with boolean value", () => {
+      const config: IEnvironmentConfig = {
+        enabled: true,
+        contextRules: {
+          isBlocked: { neq: true },
+        },
+      };
+
+      const result = evaluateFlag("test-flag", config, {
+        userId: "user123",
+        isBlocked: false,
+      });
+
+      expect(result.enabled).toBe(true);
+    });
   });
 
   describe("combined evaluation flow", () => {
-    it("should evaluate in correct order: enabled → phase → rules → percentage", () => {
+    it("should evaluate in correct order: enabled → context rules → phases → percentage", () => {
       const config: IEnvironmentConfig = {
         enabled: true,
         phases: [
@@ -839,7 +888,7 @@ describe("evaluateFlag", () => {
       expect(result.metadata.reason).toBe("flag_disabled");
     });
 
-    it("should check rules before percentage calculation", () => {
+    it("should check context rules before phases", () => {
       const config: IEnvironmentConfig = {
         enabled: true,
         phases: [
@@ -861,6 +910,29 @@ describe("evaluateFlag", () => {
       expect(result.enabled).toBe(false);
       expect(result.metadata.reason).toBe("context_rules_not_matched");
       expect(result.metadata.bucket).toBeUndefined();
+    });
+
+    it("should check context rules before phases (even during phase gaps)", () => {
+      const config: IEnvironmentConfig = {
+        enabled: true,
+        phases: [
+          {
+            startDate: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+            percentage: 100,
+          },
+        ],
+        contextRules: {
+          location: { eq: "US" },
+        },
+      };
+
+      const result = evaluateFlag("test-flag", config, {
+        userId: "user123",
+        location: "EU",
+      });
+
+      expect(result.enabled).toBe(false);
+      expect(result.metadata.reason).toBe("context_rules_not_matched");
     });
 
     it("should handle flag with phases and no rules", () => {
@@ -943,7 +1015,7 @@ describe("evaluateFlag", () => {
   });
 
   describe("edge cases and boundary conditions", () => {
-    it("should handle userId as empty string (consumer's bad data, we hash it)", () => {
+    it("should reject empty string userId", () => {
       const config: IEnvironmentConfig = {
         enabled: true,
         phases: [
@@ -956,9 +1028,8 @@ describe("evaluateFlag", () => {
 
       const result = evaluateFlag("test-flag", config, { userId: "" });
 
-      expect(result.metadata.bucket).toBeDefined();
-      expect(result.metadata.bucket).toBeGreaterThanOrEqual(0);
-      expect(result.metadata.bucket).toBeLessThan(100);
+      expect(result.enabled).toBe(false);
+      expect(result.metadata.reason).toBe("missing_user_id");
     });
 
     it("should handle very long userId", () => {

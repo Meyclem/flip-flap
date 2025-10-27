@@ -45,14 +45,14 @@ interface Phase {
 }
 
 interface OperatorExpression {
-  eq?: string | number;               // Equals
-  neq?: string | number;              // Not equals
+  eq?: string | number | boolean;     // Equals
+  neq?: string | number | boolean;    // Not equals
   gt?: number;                        // Greater than
   gte?: number;                       // Greater than or equal
   lt?: number;                        // Less than
   lte?: number;                       // Less than or equal
-  oneOf?: (string | number)[];        // In array
-  notOneOf?: (string | number)[];     // Not in array
+  oneOf?: (string | number | boolean)[];     // In array
+  notOneOf?: (string | number | boolean)[];  // Not in array
 }
 ```
 
@@ -552,7 +552,8 @@ The flag evaluation follows this exact sequence (ALL conditions must pass):
                      ▼
 ┌─────────────────────────────────────────────────────────────┐
 │ 7. Deterministic Percentage Check (if percentage configured)│
-│    - If percentage < 100 AND userId is undefined:           │
+│    - If percentage < 100 AND (userId is undefined OR       │
+│      userId === ""):                                        │
 │      → return { enabled: false, reason: "missing_user_id" } │
 │    - If percentage === 100, userId not required             │
 │    - Hash seed = userId + ":" + flagKey                     │
@@ -562,7 +563,7 @@ The flag evaluation follows this exact sequence (ALL conditions must pass):
 │    - If bucket < percentage → enabled = true                │
 │    - Else → enabled = false                                 │
 │    - Result is consistent for same user + flag              │
-│    - Note: Empty string userId is hashed (consumer data)    │
+│    - Note: Empty string userId is rejected for clarity      │
 └────────────────────┬────────────────────────────────────────┘
                      │
                      ▼
@@ -872,14 +873,14 @@ async function evaluateFlagWithFallback(flagKey, context, defaultValue = false) 
 import { z } from 'zod';
 
 const OperatorExpressionSchema = z.object({
-  eq: z.union([z.string(), z.number()]).optional(),
-  neq: z.union([z.string(), z.number()]).optional(),
+  eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
+  neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
   gt: z.number().optional(),
   gte: z.number().optional(),
   lt: z.number().optional(),
   lte: z.number().optional(),
-  oneOf: z.array(z.union([z.string(), z.number()])).min(1).optional(),  // Must have at least 1 item if provided
-  notOneOf: z.array(z.union([z.string(), z.number()])).min(1).optional()  // Must have at least 1 item if provided
+  oneOf: z.array(z.union([z.string(), z.number(), z.boolean()])).min(1).optional(),  // Must have at least 1 item if provided
+  notOneOf: z.array(z.union([z.string(), z.number(), z.boolean()])).min(1).optional()  // Must have at least 1 item if provided
 }).strict();  // Reject unknown operators
 
 const PhaseSchema = z.object({

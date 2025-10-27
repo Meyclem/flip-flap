@@ -8,7 +8,7 @@ import type {
 
 export interface EvaluationContext {
   userId?: string;
-  [key: string]: string | number | undefined;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface EvaluationResult {
@@ -48,9 +48,9 @@ function findActivePhase(phases: IPhase[] | undefined): IPhase | null {
 }
 
 function matchesOperator(
-  contextValue: string | number,
+  contextValue: string | number | boolean,
   operator: string,
-  operatorValue: string | number | (string | number)[],
+  operatorValue: string | number | boolean | (string | number | boolean)[],
 ): boolean {
   switch (operator) {
     case "eq":
@@ -137,6 +137,13 @@ export function evaluateFlag(
     };
   }
 
+  if (!matchesContextRules(context, envConfig.contextRules)) {
+    return {
+      enabled: false,
+      metadata: { reason: "context_rules_not_matched" },
+    };
+  }
+
   const activePhase = findActivePhase(envConfig.phases);
 
   if (envConfig.phases && envConfig.phases.length > 0 && !activePhase) {
@@ -146,15 +153,8 @@ export function evaluateFlag(
     };
   }
 
-  if (!matchesContextRules(context, envConfig.contextRules)) {
-    return {
-      enabled: false,
-      metadata: { reason: "context_rules_not_matched" },
-    };
-  }
-
   if (activePhase) {
-    if (activePhase.percentage < 100 && context.userId === undefined) {
+    if (activePhase.percentage < 100 && (context.userId === undefined || context.userId === "")) {
       return {
         enabled: false,
         metadata: { reason: "missing_user_id" },

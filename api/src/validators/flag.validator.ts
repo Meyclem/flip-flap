@@ -1,15 +1,15 @@
 import { z } from "zod";
 
 export const operatorExpressionSchema = z.object({
-  eq: z.union([z.string(), z.number()]).optional(),
-  neq: z.union([z.string(), z.number()]).optional(),
+  eq: z.union([z.string(), z.number(), z.boolean()]).optional(),
+  neq: z.union([z.string(), z.number(), z.boolean()]).optional(),
   gt: z.number().optional(),
   gte: z.number().optional(),
   lt: z.number().optional(),
   lte: z.number().optional(),
-  oneOf: z.array(z.union([z.string(), z.number()])).min(1)
+  oneOf: z.array(z.union([z.string(), z.number(), z.boolean()])).min(1)
     .optional(),
-  notOneOf: z.array(z.union([z.string(), z.number()])).min(1)
+  notOneOf: z.array(z.union([z.string(), z.number(), z.boolean()])).min(1)
     .optional(),
 }).strict();
 

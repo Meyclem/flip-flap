@@ -3,14 +3,14 @@ import mongoose, { type Document, Schema } from "mongoose";
 import type { Environment } from "./api-key.model.js";
 
 export interface IOperatorExpression {
-  eq?: string | number;
-  neq?: string | number;
+  eq?: string | number | boolean;
+  neq?: string | number | boolean;
   gt?: number;
   gte?: number;
   lt?: number;
   lte?: number;
-  oneOf?: (string | number)[];
-  notOneOf?: (string | number)[];
+  oneOf?: (string | number | boolean)[];
+  notOneOf?: (string | number | boolean)[];
 }
 
 export interface IPhase {

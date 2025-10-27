@@ -43,9 +43,10 @@ The system supports organizations. Each organization has its own set of feature 
 - Ensures predictable, stateless percentage distribution without server-side user state
 
 ### Cache Strategy
-- **Simple time-based TTL cache** (60 seconds)
+- **Immediate invalidation with TTL fallback** (60 seconds)
 - In-memory cache using Map with timestamps
-- No immediate invalidation on flag updates (accept up to 60s stale data)
+- Immediate cache updates on CRUD operations (create/update/delete flags)
+- TTL-based refresh as fallback for cache misses or expiration
 - Caches: Flags, API Keys, Organizations
 - Simple implementation suitable for POC
 
@@ -55,17 +56,19 @@ The system supports organizations. Each organization has its own set of feature 
 - Example: `startDate: 2025-10-25T00:00:00Z, endDate: 2025-10-31T00:00:00Z` means the phase is active from Oct 25 00:00 up to (but not including) Oct 31 00:00
 
 ### Error Response Format
-All API errors return JSON with structure:
+All API errors return RFC 7807 Problem Details JSON format:
 ```json
 {
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Human-readable description"
-  }
+  "type": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/{status}",
+  "title": "Bad Request",
+  "detail": "Human-readable description or array of validation errors",
+  "instance": "/api/flags/evaluate"
 }
 ```
 
-Error codes: `INVALID_API_KEY`, `VALIDATION_ERROR`, `FLAG_NOT_FOUND`, `INTERNAL_ERROR`
+Content-Type: `application/problem+json`
+
+Common error titles: `Bad Request`, `Unauthorized`, `Forbidden`, `Not Found`, `Conflict`, `Internal Server Error`
 
 ## Features
 
@@ -109,7 +112,6 @@ Clients use their environment-specific API key and the system automatically appl
 - **Bulk evaluation endpoint** - removed for simplicity, clients evaluate flags one at a time
 - **Web UI implementation** - deferred until API is complete
 - **API key `lastUsedAt` tracking** - removed to reduce complexity
-- **Immediate cache invalidation** - using time-based TTL only
 - **MongoDB index documentation** - left to developer discretion
 - **Complex context rule logic** - only simple AND logic, all fields required
 - **Rate limiting** - not implemented in POC, can be added via reverse proxy later
