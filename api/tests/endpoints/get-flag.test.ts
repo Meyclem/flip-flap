@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { Flag } from "../../src/models/flag.model";
 import { createApp } from "../../src/server";
-import { setupTestDatabase } from "../setup-db";
+import { setupTestDatabase, TEST_API_KEY_DEV } from "../setup-db";
 
 describe("GET /api/flags/:key", () => {
   const app = createApp();
@@ -23,7 +23,9 @@ describe("GET /api/flags/:key", () => {
       },
     });
 
-    const response = await request(app).get("/api/flags/test-flag");
+    const response = await request(app)
+      .get("/api/flags/test-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
     expect(response.body).toMatchObject({
@@ -34,7 +36,9 @@ describe("GET /api/flags/:key", () => {
   });
 
   it("should return 404 when flag does not exist", async () => {
-    const response = await request(app).get("/api/flags/non-existent");
+    const response = await request(app)
+      .get("/api/flags/non-existent")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(404);
     expect(response.body).toMatchObject({
@@ -78,7 +82,9 @@ describe("GET /api/flags/:key", () => {
       },
     });
 
-    const response = await request(app).get("/api/flags/detailed-flag");
+    const response = await request(app)
+      .get("/api/flags/detailed-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
     expect(response.body.environments).toMatchObject({
@@ -123,7 +129,9 @@ describe("GET /api/flags/:key", () => {
       },
     });
 
-    const response = await request(app).get("/api/flags/timestamped-flag");
+    const response = await request(app)
+      .get("/api/flags/timestamped-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("_id");
@@ -144,7 +152,9 @@ describe("GET /api/flags/:key", () => {
       },
     });
 
-    const response = await request(app).get("/api/flags/other-org-flag");
+    const response = await request(app)
+      .get("/api/flags/other-org-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(404);
     expect(response.body).toMatchObject({
@@ -165,7 +175,9 @@ describe("GET /api/flags/:key", () => {
       },
     });
 
-    const response = await request(app).get("/api/flags/minimal-flag");
+    const response = await request(app)
+      .get("/api/flags/minimal-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
     expect(response.body).toMatchObject({

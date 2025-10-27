@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { Flag } from "../../src/models/flag.model";
 import { createApp } from "../../src/server";
-import { setupTestDatabase } from "../setup-db";
+import { setupTestDatabase, TEST_API_KEY_DEV } from "../setup-db";
 
 describe("DELETE /api/flags/:key", () => {
   const app = createApp();
@@ -22,7 +22,9 @@ describe("DELETE /api/flags/:key", () => {
       },
     });
 
-    const response = await request(app).delete("/api/flags/test-flag");
+    const response = await request(app)
+      .delete("/api/flags/test-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(204);
     expect(response.body).toEqual({});
@@ -35,7 +37,9 @@ describe("DELETE /api/flags/:key", () => {
   });
 
   it("should return 404 when flag does not exist", async () => {
-    const response = await request(app).delete("/api/flags/non-existent");
+    const response = await request(app)
+      .delete("/api/flags/non-existent")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(404);
     expect(response.body).toMatchObject({
@@ -56,7 +60,9 @@ describe("DELETE /api/flags/:key", () => {
       },
     });
 
-    const response = await request(app).delete("/api/flags/other-org-flag");
+    const response = await request(app)
+      .delete("/api/flags/other-org-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(404);
     expect(response.body).toMatchObject({
@@ -97,7 +103,9 @@ describe("DELETE /api/flags/:key", () => {
       },
     });
 
-    const response = await request(app).delete("/api/flags/complex-flag");
+    const response = await request(app)
+      .delete("/api/flags/complex-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(204);
 
@@ -120,11 +128,14 @@ describe("DELETE /api/flags/:key", () => {
       },
     });
 
-    const deleteResponse = await request(app).delete("/api/flags/recreate-flag");
+    const deleteResponse = await request(app)
+      .delete("/api/flags/recreate-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV);
     expect(deleteResponse.status).toBe(204);
 
     const createResponse = await request(app)
       .post("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send({
         flagKey: "recreate-flag",
         name: "Recreated Flag",
@@ -151,10 +162,14 @@ describe("DELETE /api/flags/:key", () => {
       },
     });
 
-    const firstDelete = await request(app).delete("/api/flags/double-delete");
+    const firstDelete = await request(app)
+      .delete("/api/flags/double-delete")
+      .set("X-API-Key", TEST_API_KEY_DEV);
     expect(firstDelete.status).toBe(204);
 
-    const secondDelete = await request(app).delete("/api/flags/double-delete");
+    const secondDelete = await request(app)
+      .delete("/api/flags/double-delete")
+      .set("X-API-Key", TEST_API_KEY_DEV);
     expect(secondDelete.status).toBe(404);
     expect(secondDelete.body).toMatchObject({
       title: "Not Found",
@@ -185,7 +200,9 @@ describe("DELETE /api/flags/:key", () => {
       },
     });
 
-    const response = await request(app).delete("/api/flags/flag-1");
+    const response = await request(app)
+      .delete("/api/flags/flag-1")
+      .set("X-API-Key", TEST_API_KEY_DEV);
     expect(response.status).toBe(204);
 
     const flag2 = await Flag.findOne({

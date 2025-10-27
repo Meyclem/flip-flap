@@ -2,7 +2,7 @@ import request from "supertest";
 import { describe, expect, it } from "vitest";
 
 import { createApp } from "../../src/server";
-import { setupTestDatabase } from "../setup-db";
+import { setupTestDatabase, TEST_API_KEY_DEV } from "../setup-db";
 
 describe("POST /api/flags", () => {
   const app = createApp();
@@ -34,7 +34,9 @@ describe("POST /api/flags", () => {
       },
     };
 
-    const response = await request(app).post("/api/flags")
+    const response = await request(app)
+      .post("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(flagData);
 
     expect(response.status).toBe(201);
@@ -58,10 +60,14 @@ describe("POST /api/flags", () => {
       },
     };
 
-    await request(app).post("/api/flags")
+    await request(app)
+      .post("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(flagData);
 
-    const response = await request(app).post("/api/flags")
+    const response = await request(app)
+      .post("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(flagData);
 
     expect(response.status).toBe(409);
@@ -81,7 +87,9 @@ describe("POST /api/flags", () => {
       },
     };
 
-    const response = await request(app).post("/api/flags")
+    const response = await request(app)
+      .post("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(flagData);
 
     expect(response.status).toBe(400);
@@ -94,7 +102,9 @@ describe("POST /api/flags", () => {
       flagKey: "incomplete-feature",
     };
 
-    const response = await request(app).post("/api/flags")
+    const response = await request(app)
+      .post("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(flagData);
 
     expect(response.status).toBe(400);
@@ -127,7 +137,9 @@ describe("POST /api/flags", () => {
       },
     };
 
-    const response = await request(app).post("/api/flags")
+    const response = await request(app)
+      .post("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(flagData);
 
     expect(response.status).toBe(400);
@@ -156,7 +168,9 @@ describe("POST /api/flags", () => {
       },
     };
 
-    const response = await request(app).post("/api/flags")
+    const response = await request(app)
+      .post("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(flagData);
 
     expect(response.status).toBe(201);
@@ -178,7 +192,9 @@ describe("POST /api/flags", () => {
       },
     };
 
-    const response = await request(app).post("/api/flags")
+    const response = await request(app)
+      .post("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(flagData);
 
     expect(response.status).toBe(201);
@@ -199,7 +215,9 @@ describe("POST /api/flags", () => {
       },
     };
 
-    const response = await request(app).post("/api/flags")
+    const response = await request(app)
+      .post("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(flagData);
 
     expect(response.status).toBe(201);
@@ -225,7 +243,9 @@ describe("POST /api/flags", () => {
       },
     };
 
-    const response = await request(app).post("/api/flags")
+    const response = await request(app)
+      .post("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(flagData);
 
     expect(response.status).toBe(400);
@@ -246,7 +266,9 @@ describe("POST /api/flags", () => {
       },
     };
 
-    const response = await request(app).post("/api/flags")
+    const response = await request(app)
+      .post("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(flagData);
 
     expect(response.status).toBe(201);

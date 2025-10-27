@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { Flag } from "../../src/models/flag.model";
 import { createApp } from "../../src/server";
-import { setupTestDatabase } from "../setup-db";
+import { setupTestDatabase, TEST_API_KEY_DEV } from "../setup-db";
 
 describe("PUT /api/flags/:key", () => {
   const app = createApp();
@@ -24,6 +24,7 @@ describe("PUT /api/flags/:key", () => {
 
     const response = await request(app)
       .put("/api/flags/test-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send({ name: "New Name" });
 
     expect(response.status).toBe(200);
@@ -45,6 +46,7 @@ describe("PUT /api/flags/:key", () => {
 
     const response = await request(app)
       .put("/api/flags/desc-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send({ description: "New description" });
 
     expect(response.status).toBe(200);
@@ -65,6 +67,7 @@ describe("PUT /api/flags/:key", () => {
 
     const response = await request(app)
       .put("/api/flags/env-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send({
         environments: {
           development: { enabled: true },
@@ -103,6 +106,7 @@ describe("PUT /api/flags/:key", () => {
 
     const response = await request(app)
       .put("/api/flags/multi-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send({
         name: "Updated Name",
         description: "Updated description",
@@ -124,6 +128,7 @@ describe("PUT /api/flags/:key", () => {
   it("should return 404 when flag does not exist", async () => {
     const response = await request(app)
       .put("/api/flags/non-existent")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send({ name: "New Name" });
 
     expect(response.status).toBe(404);
@@ -147,6 +152,7 @@ describe("PUT /api/flags/:key", () => {
 
     const response = await request(app)
       .put("/api/flags/other-org-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send({ name: "Hacked Name" });
 
     expect(response.status).toBe(404);
@@ -170,6 +176,7 @@ describe("PUT /api/flags/:key", () => {
 
     const response = await request(app)
       .put("/api/flags/valid-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send({ name: "" });
 
     expect(response.status).toBe(400);
@@ -192,6 +199,7 @@ describe("PUT /api/flags/:key", () => {
 
     const response = await request(app)
       .put("/api/flags/phase-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send({
         environments: {
           development: {
@@ -242,6 +250,7 @@ describe("PUT /api/flags/:key", () => {
 
     const response = await request(app)
       .put("/api/flags/context-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send({
         environments: {
           development: {
@@ -281,6 +290,7 @@ describe("PUT /api/flags/:key", () => {
 
     const response = await request(app)
       .put("/api/flags/timestamp-flag")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send({ name: "Updated Name" });
 
     expect(response.status).toBe(200);

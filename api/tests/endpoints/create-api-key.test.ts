@@ -2,7 +2,7 @@ import request from "supertest";
 import { describe, expect, it } from "vitest";
 
 import { createApp } from "../../src/server";
-import { setupTestDatabase } from "../setup-db";
+import { setupTestDatabase, TEST_API_KEY_DEV } from "../setup-db";
 
 describe("POST /api/keys", () => {
   const app = createApp();
@@ -15,7 +15,9 @@ describe("POST /api/keys", () => {
       description: "Production API key for main app",
     };
 
-    const response = await request(app).post("/api/keys")
+    const response = await request(app)
+      .post("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(keyData);
 
     expect(response.status).toBe(201);
@@ -34,7 +36,9 @@ describe("POST /api/keys", () => {
       description: "Dev API key",
     };
 
-    const response = await request(app).post("/api/keys")
+    const response = await request(app)
+      .post("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(keyData);
 
     expect(response.status).toBe(201);
@@ -48,7 +52,9 @@ describe("POST /api/keys", () => {
       description: "Staging API key",
     };
 
-    const response = await request(app).post("/api/keys")
+    const response = await request(app)
+      .post("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(keyData);
 
     expect(response.status).toBe(201);
@@ -62,9 +68,13 @@ describe("POST /api/keys", () => {
       description: "First key",
     };
 
-    const response1 = await request(app).post("/api/keys")
+    const response1 = await request(app)
+      .post("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(keyData);
-    const response2 = await request(app).post("/api/keys")
+    const response2 = await request(app)
+      .post("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(keyData);
 
     expect(response1.status).toBe(201);
@@ -77,7 +87,9 @@ describe("POST /api/keys", () => {
       environment: "production",
     };
 
-    const response = await request(app).post("/api/keys")
+    const response = await request(app)
+      .post("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(keyData);
 
     expect(response.status).toBe(201);
@@ -91,7 +103,9 @@ describe("POST /api/keys", () => {
       description: "Test key",
     };
 
-    const response = await request(app).post("/api/keys")
+    const response = await request(app)
+      .post("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(keyData);
 
     expect(response.status).toBe(400);
@@ -104,7 +118,9 @@ describe("POST /api/keys", () => {
       description: "Test key",
     };
 
-    const response = await request(app).post("/api/keys")
+    const response = await request(app)
+      .post("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(keyData);
 
     expect(response.status).toBe(400);
@@ -118,7 +134,9 @@ describe("POST /api/keys", () => {
       description: "a".repeat(501),
     };
 
-    const response = await request(app).post("/api/keys")
+    const response = await request(app)
+      .post("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(keyData);
 
     expect(response.status).toBe(400);
@@ -132,7 +150,9 @@ describe("POST /api/keys", () => {
       description: "a".repeat(500),
     };
 
-    const response = await request(app).post("/api/keys")
+    const response = await request(app)
+      .post("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(keyData);
 
     expect(response.status).toBe(201);
@@ -145,7 +165,9 @@ describe("POST /api/keys", () => {
       description: "Org test key",
     };
 
-    const response = await request(app).post("/api/keys")
+    const response = await request(app)
+      .post("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV)
       .send(keyData);
 
     expect(response.status).toBe(201);

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { Flag } from "../../src/models/flag.model";
 import { createApp } from "../../src/server";
-import { setupTestDatabase } from "../setup-db";
+import { setupTestDatabase, TEST_API_KEY_DEV } from "../setup-db";
 
 describe("GET /api/flags", () => {
   const app = createApp();
@@ -11,7 +11,9 @@ describe("GET /api/flags", () => {
   setupTestDatabase();
 
   it("should return empty array when no flags exist", async () => {
-    const response = await request(app).get("/api/flags");
+    const response = await request(app)
+      .get("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual([]);
@@ -41,7 +43,9 @@ describe("GET /api/flags", () => {
       },
     });
 
-    const response = await request(app).get("/api/flags");
+    const response = await request(app)
+      .get("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(2);
@@ -81,7 +85,9 @@ describe("GET /api/flags", () => {
       },
     });
 
-    const response = await request(app).get("/api/flags");
+    const response = await request(app)
+      .get("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(2);
@@ -114,7 +120,9 @@ describe("GET /api/flags", () => {
       },
     });
 
-    const response = await request(app).get("/api/flags");
+    const response = await request(app)
+      .get("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(1);
@@ -169,7 +177,9 @@ describe("GET /api/flags", () => {
       },
     });
 
-    const response = await request(app).get("/api/flags");
+    const response = await request(app)
+      .get("/api/flags")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(1);

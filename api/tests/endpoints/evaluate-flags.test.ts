@@ -3,7 +3,7 @@ import { describe, expect, it, beforeEach } from "vitest";
 
 import { createApp } from "../../src/server";
 import { cacheService } from "../../src/services/cache.service";
-import { setupTestDatabase } from "../setup-db";
+import { setupTestDatabase, TEST_API_KEY_DEV } from "../setup-db";
 
 describe("POST /api/flags/evaluate", () => {
   const app = createApp();
@@ -16,7 +16,9 @@ describe("POST /api/flags/evaluate", () => {
 
   describe("Single flag evaluation", () => {
     it("should evaluate enabled flag without phases or rules", async () => {
-      await request(app).post("/api/flags")
+      await request(app)
+        .post("/api/flags")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "simple-flag",
           name: "Simple Flag",
@@ -29,6 +31,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "simple-flag",
           context: { userId: "user123" },
@@ -43,7 +46,9 @@ describe("POST /api/flags/evaluate", () => {
     });
 
     it("should return disabled for disabled flag", async () => {
-      await request(app).post("/api/flags")
+      await request(app)
+        .post("/api/flags")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "disabled-flag",
           name: "Disabled Flag",
@@ -56,6 +61,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "disabled-flag",
           context: { userId: "user123" },
@@ -70,7 +76,9 @@ describe("POST /api/flags/evaluate", () => {
     });
 
     it("should evaluate flag with percentage rollout", async () => {
-      await request(app).post("/api/flags")
+      await request(app)
+        .post("/api/flags")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "percentage-flag",
           name: "Percentage Flag",
@@ -92,6 +100,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "percentage-flag",
           context: { userId: "user123" },
@@ -107,7 +116,9 @@ describe("POST /api/flags/evaluate", () => {
     });
 
     it("should be deterministic for same userId and flagKey", async () => {
-      await request(app).post("/api/flags")
+      await request(app)
+        .post("/api/flags")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "deterministic-flag",
           name: "Deterministic Flag",
@@ -129,6 +140,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response1 = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "deterministic-flag",
           context: { userId: "user123" },
@@ -136,6 +148,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response2 = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "deterministic-flag",
           context: { userId: "user123" },
@@ -146,7 +159,9 @@ describe("POST /api/flags/evaluate", () => {
     });
 
     it("should evaluate flag with context rules", async () => {
-      await request(app).post("/api/flags")
+      await request(app)
+        .post("/api/flags")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "context-flag",
           name: "Context Flag",
@@ -165,6 +180,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "context-flag",
           context: {
@@ -183,7 +199,9 @@ describe("POST /api/flags/evaluate", () => {
     });
 
     it("should return disabled when context rules do not match", async () => {
-      await request(app).post("/api/flags")
+      await request(app)
+        .post("/api/flags")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "context-mismatch-flag",
           name: "Context Mismatch Flag",
@@ -201,6 +219,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "context-mismatch-flag",
           context: {
@@ -218,7 +237,9 @@ describe("POST /api/flags/evaluate", () => {
     });
 
     it("should return disabled when required context field is missing", async () => {
-      await request(app).post("/api/flags")
+      await request(app)
+        .post("/api/flags")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "missing-context-flag",
           name: "Missing Context Flag",
@@ -236,6 +257,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "missing-context-flag",
           context: { userId: "user123" },
@@ -250,7 +272,9 @@ describe("POST /api/flags/evaluate", () => {
     });
 
     it("should combine percentage and context rules", async () => {
-      await request(app).post("/api/flags")
+      await request(app)
+        .post("/api/flags")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "combined-flag",
           name: "Combined Flag",
@@ -275,6 +299,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "combined-flag",
           context: {
@@ -294,6 +319,7 @@ describe("POST /api/flags/evaluate", () => {
     it("should return disabled for non-existing flag", async () => {
       const response = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "non-existing-flag",
           context: { userId: "user123" },
@@ -308,7 +334,9 @@ describe("POST /api/flags/evaluate", () => {
     });
 
     it("should return disabled when userId missing for percentage rollout", async () => {
-      await request(app).post("/api/flags")
+      await request(app)
+        .post("/api/flags")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "no-userid-flag",
           name: "No UserId Flag",
@@ -330,6 +358,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "no-userid-flag",
           context: {},
@@ -344,7 +373,9 @@ describe("POST /api/flags/evaluate", () => {
     });
 
     it("should return disabled when no active phase", async () => {
-      await request(app).post("/api/flags")
+      await request(app)
+        .post("/api/flags")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "no-active-phase-flag",
           name: "No Active Phase Flag",
@@ -366,6 +397,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "no-active-phase-flag",
           context: { userId: "user123" },
@@ -384,6 +416,7 @@ describe("POST /api/flags/evaluate", () => {
     it("should reject request with neither flagKey nor flagKeys", async () => {
       const response = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           context: { userId: "user123" },
         });
@@ -395,6 +428,7 @@ describe("POST /api/flags/evaluate", () => {
     it("should reject request without context", async () => {
       const response = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "test-flag",
         });
@@ -406,6 +440,7 @@ describe("POST /api/flags/evaluate", () => {
     it("should reject invalid context type", async () => {
       const response = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "test-flag",
           context: "invalid",
@@ -418,7 +453,9 @@ describe("POST /api/flags/evaluate", () => {
 
   describe("Cache integration", () => {
     it("should use cache after first evaluation", async () => {
-      await request(app).post("/api/flags")
+      await request(app)
+        .post("/api/flags")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "cached-flag",
           name: "Cached Flag",
@@ -431,6 +468,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response1 = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "cached-flag",
           context: { userId: "user123" },
@@ -441,6 +479,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response2 = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "cached-flag",
           context: { userId: "user123" },
@@ -451,7 +490,9 @@ describe("POST /api/flags/evaluate", () => {
     });
 
     it("should invalidate cache when flag is updated", async () => {
-      await request(app).post("/api/flags")
+      await request(app)
+        .post("/api/flags")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "update-test-flag",
           name: "Update Test Flag",
@@ -464,6 +505,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response1 = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "update-test-flag",
           context: { userId: "user123" },
@@ -471,7 +513,9 @@ describe("POST /api/flags/evaluate", () => {
 
       expect(response1.body.enabled).toBe(false);
 
-      await request(app).put("/api/flags/update-test-flag")
+      await request(app)
+        .put("/api/flags/update-test-flag")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           environments: {
             development: { enabled: true },
@@ -482,6 +526,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response2 = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "update-test-flag",
           context: { userId: "user123" },
@@ -491,7 +536,9 @@ describe("POST /api/flags/evaluate", () => {
     });
 
     it("should invalidate cache when flag is deleted", async () => {
-      await request(app).post("/api/flags")
+      await request(app)
+        .post("/api/flags")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "delete-test-flag",
           name: "Delete Test Flag",
@@ -504,6 +551,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response1 = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "delete-test-flag",
           context: { userId: "user123" },
@@ -511,10 +559,13 @@ describe("POST /api/flags/evaluate", () => {
 
       expect(response1.body.enabled).toBe(true);
 
-      await request(app).delete("/api/flags/delete-test-flag");
+      await request(app)
+        .delete("/api/flags/delete-test-flag")
+        .set("X-API-Key", TEST_API_KEY_DEV);
 
       const response2 = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "delete-test-flag",
           context: { userId: "user123" },
@@ -527,6 +578,7 @@ describe("POST /api/flags/evaluate", () => {
     it("should invalidate cache when flag is created", async () => {
       const response1 = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "new-cache-flag",
           context: { userId: "user123" },
@@ -535,7 +587,9 @@ describe("POST /api/flags/evaluate", () => {
       expect(response1.body.enabled).toBe(false);
       expect(response1.body.metadata.reason).toBe("flag_not_found");
 
-      await request(app).post("/api/flags")
+      await request(app)
+        .post("/api/flags")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "new-cache-flag",
           name: "New Cache Flag",
@@ -548,6 +602,7 @@ describe("POST /api/flags/evaluate", () => {
 
       const response2 = await request(app)
         .post("/api/flags/evaluate")
+        .set("X-API-Key", TEST_API_KEY_DEV)
         .send({
           flagKey: "new-cache-flag",
           context: { userId: "user123" },

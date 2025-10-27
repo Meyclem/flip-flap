@@ -1,7 +1,6 @@
 import crypto from "node:crypto";
 
 import type { Request, Response } from "express";
-import { Types } from "mongoose";
 
 import { ApiKey } from "@/models/api-key.model.js";
 import { createApiKeySchema } from "@/validators/api-key.validator.js";
@@ -14,7 +13,7 @@ export const createApiKey = async (request: Request, response: Response) => {
   }
 
   const { environment, description } = validationResult.data;
-  const organizationId = response.locals.organizationId ?? new Types.ObjectId("000000000000000000000001");
+  const organizationId = response.locals.organizationId;
 
   const key = `${environment.slice(0, 4)}_${crypto.randomBytes(32).toString("hex")}`;
 
@@ -29,7 +28,7 @@ export const createApiKey = async (request: Request, response: Response) => {
 };
 
 export const listApiKeys = async (_request: Request, response: Response) => {
-  const organizationId = response.locals.organizationId ?? new Types.ObjectId("000000000000000000000001");
+  const organizationId = response.locals.organizationId;
 
   const apiKeys = await ApiKey.find({ organizationId }).sort({ createdAt: -1 });
 

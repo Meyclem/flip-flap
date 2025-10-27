@@ -3,21 +3,32 @@ import { describe, expect, it } from "vitest";
 
 import { ApiKey } from "../../src/models/api-key.model";
 import { createApp } from "../../src/server";
-import { setupTestDatabase } from "../setup-db";
+import { setupTestDatabase, TEST_API_KEY_DEV } from "../setup-db";
 
 describe("GET /api/keys", () => {
   const app = createApp();
 
   setupTestDatabase();
 
-  it("should return empty array when no keys exist", async () => {
-    const response = await request(app).get("/api/keys");
+  it("should return existing API keys for the organization", async () => {
+    const response = await request(app)
+      .get("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual([]);
+    expect(response.body).toHaveLength(3);
+    expect(response.body[0]).toHaveProperty("key");
+    expect(response.body[0]).toHaveProperty("environment");
+    expect(response.body[0]).toHaveProperty("organizationId");
   });
 
   it("should return all API keys for the organization", async () => {
+    await ApiKey.deleteMany({});
+    await ApiKey.create({
+      organizationId: "000000000000000000000001",
+      key: TEST_API_KEY_DEV,
+      environment: "development",
+    });
     await ApiKey.create({
       organizationId: "000000000000000000000001",
       key: "prod_abc123",
@@ -32,10 +43,12 @@ describe("GET /api/keys", () => {
       description: "Development key",
     });
 
-    const response = await request(app).get("/api/keys");
+    const response = await request(app)
+      .get("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveLength(2);
+    expect(response.body).toHaveLength(3);
     expect(response.body[0]).toMatchObject({
       key: "deve_xyz789",
       environment: "development",
@@ -49,6 +62,12 @@ describe("GET /api/keys", () => {
   });
 
   it("should return keys sorted by createdAt descending (newest first)", async () => {
+    await ApiKey.deleteMany({});
+    await ApiKey.create({
+      organizationId: "000000000000000000000001",
+      key: TEST_API_KEY_DEV,
+      environment: "development",
+    });
     const key1 = await ApiKey.create({
       organizationId: "000000000000000000000001",
       key: "prod_old123",
@@ -65,15 +84,23 @@ describe("GET /api/keys", () => {
       description: "New key",
     });
 
-    const response = await request(app).get("/api/keys");
+    const response = await request(app)
+      .get("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveLength(2);
+    expect(response.body).toHaveLength(3);
     expect(response.body[0]._id).toBe(key2._id.toString());
     expect(response.body[1]._id).toBe(key1._id.toString());
   });
 
   it("should include all key properties", async () => {
+    await ApiKey.deleteMany({});
+    await ApiKey.create({
+      organizationId: "000000000000000000000001",
+      key: TEST_API_KEY_DEV,
+      environment: "development",
+    });
     await ApiKey.create({
       organizationId: "000000000000000000000001",
       key: "prod_complete123",
@@ -81,21 +108,31 @@ describe("GET /api/keys", () => {
       description: "Complete key with all fields",
     });
 
-    const response = await request(app).get("/api/keys");
+    const response = await request(app)
+      .get("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveLength(1);
-    expect(response.body[0]).toMatchObject({
+    expect(response.body).toHaveLength(2);
+
+    const prodKey = response.body.find((k: { key: string }) => k.key === "prod_complete123");
+    expect(prodKey).toMatchObject({
       key: "prod_complete123",
       environment: "production",
       description: "Complete key with all fields",
     });
-    expect(response.body[0]).toHaveProperty("_id");
-    expect(response.body[0]).toHaveProperty("organizationId");
-    expect(response.body[0]).toHaveProperty("createdAt");
+    expect(prodKey).toHaveProperty("_id");
+    expect(prodKey).toHaveProperty("organizationId");
+    expect(prodKey).toHaveProperty("createdAt");
   });
 
   it("should only return keys for the current organization", async () => {
+    await ApiKey.deleteMany({});
+    await ApiKey.create({
+      organizationId: "000000000000000000000001",
+      key: TEST_API_KEY_DEV,
+      environment: "development",
+    });
     await ApiKey.create({
       organizationId: "000000000000000000000001",
       key: "prod_org1key",
@@ -110,14 +147,22 @@ describe("GET /api/keys", () => {
       description: "Org 2 key",
     });
 
-    const response = await request(app).get("/api/keys");
+    const response = await request(app)
+      .get("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveLength(1);
+    expect(response.body).toHaveLength(2);
     expect(response.body[0].key).toBe("prod_org1key");
   });
 
   it("should return keys for all environments mixed together", async () => {
+    await ApiKey.deleteMany({});
+    await ApiKey.create({
+      organizationId: "000000000000000000000001",
+      key: TEST_API_KEY_DEV,
+      environment: "development",
+    });
     await ApiKey.create({
       organizationId: "000000000000000000000001",
       key: "prod_key1",
@@ -136,10 +181,12 @@ describe("GET /api/keys", () => {
       environment: "development",
     });
 
-    const response = await request(app).get("/api/keys");
+    const response = await request(app)
+      .get("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveLength(3);
+    expect(response.body).toHaveLength(4);
 
     const environments = response.body.map((k: { environment: string }) => k.environment);
     expect(environments).toContain("production");
@@ -148,16 +195,24 @@ describe("GET /api/keys", () => {
   });
 
   it("should return key without description when not provided", async () => {
+    await ApiKey.deleteMany({});
+    await ApiKey.create({
+      organizationId: "000000000000000000000001",
+      key: TEST_API_KEY_DEV,
+      environment: "development",
+    });
     await ApiKey.create({
       organizationId: "000000000000000000000001",
       key: "prod_nodesc123",
       environment: "production",
     });
 
-    const response = await request(app).get("/api/keys");
+    const response = await request(app)
+      .get("/api/keys")
+      .set("X-API-Key", TEST_API_KEY_DEV);
 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveLength(1);
+    expect(response.body).toHaveLength(2);
     expect(response.body[0].description).toBeUndefined();
   });
 });

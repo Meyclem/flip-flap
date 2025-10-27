@@ -1,5 +1,4 @@
 import type { Request, Response } from "express";
-import { Types } from "mongoose";
 
 import { Flag } from "@/models/flag.model.js";
 import { cacheService } from "@/services/cache.service.js";
@@ -10,7 +9,7 @@ import { evaluateFlagSchema } from "@/validators/evaluate.validator.js";
 import { createFlagSchema, updateFlagSchema } from "@/validators/flag.validator.js";
 
 export const listFlags = async (_request: Request, response: Response) => {
-  const organizationId = response.locals.organizationId ?? new Types.ObjectId("000000000000000000000001");
+  const organizationId = response.locals.organizationId;
 
   const flags = await Flag.find({ organizationId }).sort({ createdAt: -1 });
 
@@ -19,7 +18,7 @@ export const listFlags = async (_request: Request, response: Response) => {
 
 export const getFlag = async (request: Request, response: Response) => {
   const { key } = request.params;
-  const organizationId = response.locals.organizationId ?? new Types.ObjectId("000000000000000000000001");
+  const organizationId = response.locals.organizationId;
 
   const flag = await Flag.findOne({ organizationId, flagKey: key });
 
@@ -32,7 +31,7 @@ export const getFlag = async (request: Request, response: Response) => {
 
 export const updateFlag = async (request: Request, response: Response) => {
   const { key } = request.params;
-  const organizationId = response.locals.organizationId ?? new Types.ObjectId("000000000000000000000001");
+  const organizationId = response.locals.organizationId;
 
   const validationResult = updateFlagSchema.safeParse(request.body);
 
@@ -57,7 +56,7 @@ export const updateFlag = async (request: Request, response: Response) => {
 
 export const deleteFlag = async (request: Request, response: Response) => {
   const { key } = request.params;
-  const organizationId = response.locals.organizationId ?? new Types.ObjectId("000000000000000000000001");
+  const organizationId = response.locals.organizationId;
 
   if (!key) {
     throw new NotFoundError("Flag key is required");
@@ -83,7 +82,7 @@ export const createFlag = async (request: Request, response: Response) => {
 
   const { flagKey, name, description, environments } = validationResult.data;
 
-  const organizationId = response.locals.organizationId ?? new Types.ObjectId("000000000000000000000001");
+  const organizationId = response.locals.organizationId;
 
   const existingFlag = await Flag.findOne({ organizationId, flagKey });
   if (existingFlag) {
@@ -111,8 +110,8 @@ export const evaluateFlags = async (request: Request, response: Response) => {
   }
 
   const { flagKey, context } = validationResult.data;
-  const organizationId = response.locals.organizationId ?? new Types.ObjectId("000000000000000000000001");
-  const environment = (response.locals.environment ?? "development");
+  const organizationId = response.locals.organizationId;
+  const environment = response.locals.environment;
 
   try {
     const flag = await cacheService.get(organizationId, flagKey);
