@@ -386,7 +386,7 @@ if (result.enabled) {
 9. [x] Build evaluation endpoint:
    - [x] `POST /api/flags/evaluate` - Flag evaluation (uses step 8 logic)
 10. [x] Add in-memory caching
-11. [ ] Implement API key authentication middleware
+11. [x] Implement API key authentication middleware
 12. [ ] Build web UI login
 13. [ ] Build web UI flag list and create
 14. [ ] Build web UI flag edit with rollout and rules

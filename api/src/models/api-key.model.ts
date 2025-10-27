@@ -23,7 +23,6 @@ const apiKeySchema = new Schema<IApiKey>(
       type: String,
       required: true,
       unique: true,
-      index: true,
     },
     environment: {
       type: String,

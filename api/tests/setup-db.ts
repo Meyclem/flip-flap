@@ -16,6 +16,7 @@ export const setupTestDatabase = () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
     await mongoose.connect(uri);
+    await ApiKey.init();
   });
 
   afterAll(async () => {

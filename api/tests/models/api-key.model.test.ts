@@ -178,7 +178,7 @@ describe("ApiKey Model", () => {
     expect(hasCompoundIndex).toBe(true);
   });
 
-  it("should allow same key for different organizations", async () => {
+  it("should enforce globally unique keys across organizations", async () => {
     const org2 = await Organization.create({ name: "Test Org 2" });
     const sharedKey = "shared_key_123";
 

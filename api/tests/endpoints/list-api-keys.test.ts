@@ -49,25 +49,37 @@ describe("GET /api/keys", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(3);
-    expect(response.body[0]).toMatchObject({
-      key: "deve_xyz789",
-      environment: "development",
-      description: "Development key",
-    });
-    expect(response.body[1]).toMatchObject({
+
+    const keys = response.body.map((k: { key: string }) => k.key);
+    expect(keys).toContain(TEST_API_KEY_DEV);
+    expect(keys).toContain("prod_abc123");
+    expect(keys).toContain("deve_xyz789");
+
+    const prodKey = response.body.find((k: { key: string }) => k.key === "prod_abc123");
+    expect(prodKey).toMatchObject({
       key: "prod_abc123",
       environment: "production",
       description: "Production key",
+    });
+
+    const devKey = response.body.find((k: { key: string }) => k.key === "deve_xyz789");
+    expect(devKey).toMatchObject({
+      key: "deve_xyz789",
+      environment: "development",
+      description: "Development key",
     });
   });
 
   it("should return keys sorted by createdAt descending (newest first)", async () => {
     await ApiKey.deleteMany({});
-    await ApiKey.create({
+    const key0 = await ApiKey.create({
       organizationId: "000000000000000000000001",
       key: TEST_API_KEY_DEV,
       environment: "development",
     });
+
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
     const key1 = await ApiKey.create({
       organizationId: "000000000000000000000001",
       key: "prod_old123",
@@ -92,6 +104,7 @@ describe("GET /api/keys", () => {
     expect(response.body).toHaveLength(3);
     expect(response.body[0]._id).toBe(key2._id.toString());
     expect(response.body[1]._id).toBe(key1._id.toString());
+    expect(response.body[2]._id).toBe(key0._id.toString());
   });
 
   it("should include all key properties", async () => {
@@ -153,7 +166,15 @@ describe("GET /api/keys", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(2);
-    expect(response.body[0].key).toBe("prod_org1key");
+
+    const keys = response.body.map((k: { key: string }) => k.key);
+    expect(keys).toContain(TEST_API_KEY_DEV);
+    expect(keys).toContain("prod_org1key");
+    expect(keys).not.toContain("prod_org2key");
+
+    response.body.forEach((key: { organizationId: string }) => {
+      expect(key.organizationId).toBe("000000000000000000000001");
+    });
   });
 
   it("should return keys for all environments mixed together", async () => {
