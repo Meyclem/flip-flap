@@ -41,3 +41,5 @@ temp/
 
 # Exceptions - allow SCRATCHPAD.md to be committed
 !SCRATCHPAD.md
+!CLAUDE.md
+!.claude
